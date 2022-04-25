@@ -346,6 +346,25 @@ public class PhpModelTest {
         Assert.assertEquals(codegen.toEnumVarName("hello", null), "HELLO");
     }
 
+    @Test(description = "test variable names for reserved characters and word")
+    public void testVarName() throws Exception {
+        final DefaultCodegen codegen = new PhpClientCodegen();
+        Assert.assertEquals(codegen.toVarName("@id"), "at_id");
+        Assert.assertEquals(codegen.toVarName("@type"), "at_type");
+        Assert.assertEquals(codegen.toVarName("@context"), "at_context");
+        Assert.assertEquals(codegen.toVarName("public"), "at_public");
+        Assert.assertEquals(codegen.toVarName("Private"), "at_private");
+        Assert.assertEquals(codegen.toVarName("IF"), "at_if");
+        Assert.assertEquals(codegen.toVarName("$someDollar"), "at_some_dollar");
+        Assert.assertEquals(codegen.toVarName("!notThis"), "at_not_this");
+
+        // allow starting with underscore
+        Assert.assertEquals(codegen.toVarName("_allowUnderscore"), "_allow_underscore");
+
+        // should not escape non-reserved
+        Assert.assertEquals(codegen.toVarName("hello"), "hello");
+    }
+
     @Test(description = "returns DateTime when using `--model-name-prefix`")
     public void dateTest() {
         final Swagger model =  new SwaggerParser().read("src/test/resources/2_0/datePropertyTest.json");

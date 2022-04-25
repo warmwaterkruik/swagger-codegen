@@ -448,6 +448,18 @@ public class PhpClientCodegen extends DefaultCodegen implements CodegenConfig {
 
     @Override
     public String toVarName(String name) {
+        // check for reserved words or vars starting with digits or special characters
+        // need to escape it by appending at_ at the beginning
+        // this needs to run before sanitizeName because that will strip te special chars resulting in
+        // duplicate methods when you have properties id and @id in the same model schema
+        if (name.matches("^(\\W|\\d).*")) {
+            name = name.replaceAll("^(\\W|\\d)", "at_");
+        }
+        // it is bad form to use reserved words as variable names
+        if (isReservedWord(name)) {
+            name = "at_" + name;
+        }
+
         // sanitize name
         name = sanitizeName(name); // FIXME: a parameter should not be assigned. Also declare the methods parameters as 'final'.
 
@@ -459,12 +471,6 @@ public class PhpClientCodegen extends DefaultCodegen implements CodegenConfig {
           // return the name in underscore style
           // PhoneNumber => phone_number
           name =  underscore(name);
-        }
-
-        // parameter name starting with number won't compile
-        // need to escape it by appending _ at the beginning
-        if (name.matches("^\\d.*")) {
-            name = "_" + name;
         }
 
         return name;
